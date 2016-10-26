@@ -9,7 +9,7 @@ function mainCtrl($scope, sharedHeader) {
     $scope.$on('pathUpdated', function() {
         $scope.db = sharedHeader.db;
         $scope.table = sharedHeader.table;
-    });        
+    });
 }
 // Controller for the list of posts
 function IndexCtrl($scope, $http, $routeParams, $route, sharedHeader, feedback) {
@@ -98,7 +98,7 @@ function AddTableCtrl($scope, $http, $location, sharedHeader, $route, $routePara
                 }
             }
         })
- 
+
     // Create a table
     $scope.createTable = function () {
         if ($scope.form.db == '') {
@@ -130,7 +130,7 @@ function DeleteDbCtrl($scope, $http, $location, $routeParams, $window, sharedHea
     $scope.db = $routeParams.db;
     sharedHeader.updatePath($scope);
 
-    // Delete a database 
+    // Delete a database
     $scope.deleteDb = function () {
         $http.post('/api/database/delete', {db: $scope.db}).
         success(function(data) {
@@ -184,6 +184,7 @@ function DeleteTableCtrl($scope, $http, $location, $routeParams, $window, shared
 
 function TableCtrl($scope, $http, $location, $routeParams, $window, $route, sharedHeader) {
     var maxCount = 9901;
+    $scope.filter = ''
     $scope.newType = 'undefined'; // Just to remove the empty select option
     $scope.deepCopy = h.deepCopy;
     $scope.goBack = function($event) {
@@ -213,53 +214,56 @@ function TableCtrl($scope, $http, $location, $routeParams, $window, $route, shar
         $location.path('/db/'+$scope.db);
     }
 
-    $http.get('/api/table', {params: {db: $scope.db, table: $scope.table, skip: $scope.skip, limit: $scope.limit, order: $routeParams.order, ascDescValue: $scope.ascDescValue}}).
-        success(function(data) {
-            if (data.error != null) {
-                $scope.status = 'error';
-                h.handleError(data.error);
-            }
-            else if (data.documents.length === 0) {
-                $scope.status = 'empty'
-            }
-            else {
-                // Save what we are going to display
-                $scope.raw_fields = data.flattened_fields;
-                $scope.flattenedTypes = data.flattenedTypes;
-                $scope.nestedFields = data.nestedFields;
+    $scope.refreshData = function() {
+      $http.get('/api/table', {params: {db: $scope.db, table: $scope.table, skip: $scope.skip, limit: $scope.limit, order: $routeParams.order, ascDescValue: $scope.ascDescValue, filter: $scope.filter}}).
+          success(function(data) {
+              if (data.error != null) {
+                  $scope.status = 'error';
+                  h.handleError(data.error);
+              }
+              else if (data.documents.length === 0) {
+                  $scope.status = 'empty'
+              }
+              else {
+                  // Save what we are going to display
+                  $scope.raw_fields = data.flattened_fields;
+                  $scope.flattenedTypes = data.flattenedTypes;
+                  $scope.nestedFields = data.nestedFields;
 
-                $scope.fields = []
-                for(var i=0; i<data.flattened_fields.length; i++) {
-                    var name = data.flattened_fields[i].join('.');
-                    $scope.fields.push({
-                        name: name,
-                        has_index: data.indexes[name] === true
-                    })
-                }
-                $scope.flattened_docs = flatten_docs(data.documents, data.flattened_fields)
+                  $scope.fields = []
+                  for(var i=0; i<data.flattened_fields.length; i++) {
+                      var name = data.flattened_fields[i].join('.');
+                      $scope.fields.push({
+                          name: name,
+                          has_index: data.indexes[name] === true
+                      })
+                  }
+                  $scope.flattened_docs = flatten_docs(data.documents, data.flattened_fields)
 
-                $scope.documents = data.documents;
+                  $scope.documents = data.documents;
 
-                $scope.primaryKey = data.primaryKey;
+                  $scope.primaryKey = data.primaryKey;
 
-                $scope.order = $routeParams.order || $scope.primaryKey;
-                $scope.more_data = data.more_data;
+                  $scope.order = $routeParams.order || $scope.primaryKey;
+                  $scope.more_data = data.more_data;
 
-                $scope.status = 'list';
-                var pages = [];
-                for(var i=1; i<Math.ceil(Math.min(data.count, maxCount-1+$scope.skip)/$scope.limit)+1; i++) {
-                    pages.push(i);
-                }
-                if (data.count === maxCount+$scope.skip) {
-                    $scope.orderOnlyWithIndex = true;
-                    pages.push('...');
-                }
-                $scope.pages = pages;
-                $scope.page = pages[Math.floor($scope.skip/$scope.limit)];
+                  $scope.status = 'list';
+                  var pages = [];
+                  for(var i=1; i<Math.ceil(Math.min(data.count, maxCount-1+$scope.skip)/$scope.limit)+1; i++) {
+                      pages.push(i);
+                  }
+                  if (data.count === maxCount+$scope.skip) {
+                      $scope.orderOnlyWithIndex = true;
+                      pages.push('...');
+                  }
+                  $scope.pages = pages;
+                  $scope.page = pages[Math.floor($scope.skip/$scope.limit)];
 
-                $scope.count = data.count;
-            }
-        })
+                  $scope.count = data.count;
+              }
+          })
+    }
+    $scope.refreshData()
     $scope.jump = function(page) {
         if (page === '...') {
             page = $scope.pages[$scope.pages.length-2]+1
@@ -381,7 +385,7 @@ function TableCtrl($scope, $http, $location, $routeParams, $window, $route, shar
     $scope.deleteTrigger = function(index) {
         if ((index === $scope.display) && ($scope.operation === 'delete')) {
             $scope.display = null;
-            $scope.operation = null 
+            $scope.operation = null
         }
         else {
             $scope.display = index;
@@ -457,10 +461,10 @@ function TableCtrl($scope, $http, $location, $routeParams, $window, $route, shar
         $scope.operation = null;
         $scope.newDoc = null;
         $scope.operation = null;
-        $scope.changeField = null; 
+        $scope.changeField = null;
     }
 
-   
+
     var flatten_docs = function(docs, keys) {
         var result = [];
         for(var i=0; i<docs.length; i++) {
@@ -476,7 +480,7 @@ function TableCtrl($scope, $http, $location, $routeParams, $window, $route, shar
                 flattened_doc.push({
                     type: $scope.computeType(value),
                     value: stringify(value)
-                }); 
+                });
             }
             result.push(flattened_doc)
         }
@@ -515,7 +519,7 @@ function TableCtrl($scope, $http, $location, $routeParams, $window, $route, shar
     }
 
     // Only for array of primitives
-    var arrayEqual = function(ar1, ar2) { 
+    var arrayEqual = function(ar1, ar2) {
         if (ar1.length != ar2.length) {
             return false
         }
@@ -803,7 +807,7 @@ function AddFieldCtrl($scope, $http, $location, $routeParams, $window, sharedHea
         }
     }
 }
- 
+
 
 // Helpers
 var h = {};
@@ -922,7 +926,7 @@ h.setValue = function(doc, fields, value) {
 h.computeType = function(value) {
     if (value === undefined) {
         return 'undefined'
-    } else if (value === null) { 
+    } else if (value === null) {
         return 'null'
     } else if (typeof value === 'boolean') {
         return 'boolean'
@@ -1040,7 +1044,7 @@ h.dateToString = function(date) {
     var timezone, timezone_int;
     if (date.timezone != null) {
         timezone = date.timezone
-        
+
         // Extract data from the timezone
         var timezone_array = date.timezone.split(':')
         var sign = timezone_array[0][0] // Keep the sign

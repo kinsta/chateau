@@ -36,7 +36,7 @@ module.exports = function(config) {
         app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
     });
 
-    // Home 
+    // Home
     app.get('/', routes.index);
     // Templates
     app.get('/partials/:name', routes.partials);
@@ -50,7 +50,7 @@ module.exports = function(config) {
     app.post('/api/table/add', api.tableAdd);
     // Delete a database
     app.post('/api/database/delete', api.databaseDelete);
-    // Delete a table 
+    // Delete a table
     app.post('/api/table/delete', api.tableDelete);
     app.post('/api/table/empty', api.tableEmpty);
 
@@ -75,5 +75,4 @@ module.exports = function(config) {
     app.listen(config.expressPort, config.network, function(){
         console.log("Express server listening on port %d", config.expressPort);
     });
-
 }

@@ -10,6 +10,9 @@ div.table_view(ng-switch="", on="status")
     div.alert.hidden
         a.close(href="#", ng-click="hide($event)") ×
         span.alert_content
+    
+    input(ng-model="filter")
+    button(ng-click="refreshData()") send
 
     div(ng-switch-when="loading")
         img(src="images/ajax-loader.gif")
@@ -17,7 +20,7 @@ div.table_view(ng-switch="", on="status")
     div.section(ng-switch-when="error")
         h1 Error
         div.content Sorry, an error occurred, please <a href="#" ng-click="refresh($event)">try again</a>.
-
+    
     div(ng-switch-when="empty")
         div.table_view(ng-switch="", on="status")
             div.section
@@ -129,5 +132,3 @@ div.table_view(ng-switch="", on="status")
         div.link_previous_next(ng-switch="", on="more_data")
             p(ng-switch-when="1") <a href="/table/{{db}}/{{table}}/{{skip+limit}}/{{limit}}/{{order}}/{{ascDescValue}}">Next »»</a>
             p(ng-switch-default) Next »»
-
-
