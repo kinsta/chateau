@@ -44,15 +44,15 @@ module.exports = function(config) {
     // Get a list of databases and tables
     app.get('/api/databases/tables', api.databasesAndTables);
     // Add a database
-    app.post('/api/database/add', api.databaseAdd);
+    // app.post('/api/database/add', api.databaseAdd);
     // Add a table
-    app.get('/api/databases', api.databases);
-    app.post('/api/table/add', api.tableAdd);
+    // app.get('/api/databases', api.databases);
+    // app.post('/api/table/add', api.tableAdd);
     // Delete a database
-    app.post('/api/database/delete', api.databaseDelete);
+    // app.post('/api/database/delete', api.databaseDelete);
     // Delete a table
-    app.post('/api/table/delete', api.tableDelete);
-    app.post('/api/table/empty', api.tableEmpty);
+    // app.post('/api/table/delete', api.tableDelete);
+    // app.post('/api/table/empty', api.tableEmpty);
 
     app.get('/api/table', api.table);
     app.get('/api/table/list/:order/:skip/:limit', api.table);
@@ -63,9 +63,9 @@ module.exports = function(config) {
     app.post('/api/doc/update', api.docUpdate);
     app.post('/api/doc/insert', api.docInsert);
 
-    app.post('/api/field/delete', api.fieldDelete);
-    app.post('/api/field/rename', api.fieldRename);
-    app.post('/api/field/add', api.fieldAdd);
+    // app.post('/api/field/delete', api.fieldDelete);
+    // app.post('/api/field/rename', api.fieldRename);
+    // app.post('/api/field/add', api.fieldAdd);
 
     // Redirect all others to the index
     // A 404 page is probably a better move
