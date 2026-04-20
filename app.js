@@ -2,6 +2,7 @@ module.exports = function(config) {
 
     // Import
     var express = require('express'),
+        methodOverride = require('method-override'),
         routes = require('./routes'),
         api = require('./routes/api')(config);
 
@@ -19,22 +20,14 @@ module.exports = function(config) {
     })
 
     // Configuration
-    app.configure(function(){
-        app.set('views', __dirname + '/views');
-        app.set('view engine', 'jade');
-        app.set('view options', {
-            layout: false
-        });
-        app.use(express.json());
-        app.use(express.urlencoded());
-
-
-        app.use(express.methodOverride());
-        app.use(express.static(__dirname + '/public'));
-        app.use(app.router);
-
-        app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
-    });
+    app.set('views', __dirname + '/views');
+    app.set('view engine', 'jade');
+    app.locals.pretty = true;
+    
+    app.use(express.json());
+    app.use(express.urlencoded({ extended: false }));
+    app.use(methodOverride());
+    app.use(express.static(__dirname + '/public'));
 
     // Home
     app.get('/', routes.index);
@@ -70,6 +63,12 @@ module.exports = function(config) {
     // Redirect all others to the index
     // A 404 page is probably a better move
     app.get('*', routes.index);
+
+    // Error handler (must be last)
+    app.use(function(err, req, res, next) {
+        console.error(err.stack);
+        res.status(500).send('Internal Server Error');
+    });
 
     // Start server
     app.listen(config.expressPort, config.network, function(){
