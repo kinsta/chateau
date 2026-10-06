@@ -1,0 +1,21 @@
+name: Scheduled npm audit fix
+
+on:
+  # Runs every Monday at 00:00 UTC
+  schedule:
+    - cron: '0 0 * * 1'
+  # Can be triggered manually on the UI
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  packages: read
+
+jobs:
+  npm-audit-fix:
+    uses: kinsta/development-shared-workflows/.github/workflows/npm-audit-fix.yml@main
+    with:
+      branch: 'master'
+    secrets:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
