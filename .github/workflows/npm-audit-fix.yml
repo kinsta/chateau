@@ -1,5 +1,8 @@
 name: Scheduled npm audit fix
 
+# This is a standalone copy of kinsta/development-shared-workflows' npm-audit-fix.yml,
+# because public repositories cannot call reusable workflows from internal repositories.
+
 on:
   # Runs every Monday at 00:00 UTC
   schedule:
@@ -10,12 +13,43 @@ on:
 permissions:
   contents: write
   pull-requests: write
-  packages: read
 
 jobs:
   npm-audit-fix:
-    uses: kinsta/development-shared-workflows/.github/workflows/npm-audit-fix.yml@main
-    with:
-      branch: 'master'
-    secrets:
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: master
+
+      - name: Setup node.js with Volta
+        uses: volta-cli/action@v4
+
+      - name: Print versions
+        run: |
+          node --version
+          npm --version
+
+      - name: Fix vulnerabilities
+        run: npm audit fix --audit-level=none
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: "feature/npm-audit-fix"
+          delete-branch: true
+          commit-message: 'chore: fix npm vulnerabilities'
+          title: "Scheduled npm audit fix"
+          body: |
+            This PR fixes npm dependency vulnerabilities by running `npm audit fix`.
+
+            Only non-breaking version changes are applied, which means that most of the time no functionality will change. But the PR must still be reviewed and thoroughly tested before merging.
+
+            In case of a conflict with the `package-lock.json` file, you should trigger the workflow manually and that will update the PR based on the latest commit from the default branch.
+            You can do that on [this page](../actions/workflows/npm-audit-fix.yml) by clicking on the "Run workflow" button.
+
+            Some vulnerabilities may not be fixed automatically and will require attention. Check them out on the Security > Dependabot Alerts page of the repository.
+          labels: "dependencies"
