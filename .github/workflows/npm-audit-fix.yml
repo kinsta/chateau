@@ -33,7 +33,9 @@ jobs:
           npm --version
 
       - name: Fix vulnerabilities
-        run: npm audit fix --audit-level=none
+        # --ignore-scripts: the legacy phantomjs install script fails on current Node versions,
+        # and only package-lock.json needs to be updated here
+        run: npm audit fix --audit-level=none --ignore-scripts
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
